@@ -323,15 +323,15 @@ function varpro(ctx)
             iv[PRUNIT] = 0
             if ctx.opto == NL2SOL
                 results = nl2sol(f, g, alpha_real, mreal, iv, v)
-                println("\nNL2sol return code: ", return_code[iv[1]])
+                ctx.verbose && println("\nNL2sol return code: ", return_code[iv[1]])
             else
                 results = nl2sno(f, alpha_real, mreal, iv, v)
-                println("\nNL2sno return code: ", return_code[iv[1]])
+                ctx.verbose && println("\nNL2sno return code: ", return_code[iv[1]])
             end
         end
 
-        println(nl2_msg)
-        @show(results)
+        ctx.verbose && println(nl2_msg)
+        ctx.verbose && @show(results)
         alpha_real[:] = results.minimum[:]
         if ctx.iscomplex
             ctx.alpha = complex(alpha_real[1:ctx.q], alpha_real[ctx.q+1:end])
@@ -348,9 +348,7 @@ function varpro(ctx)
 
     else       # The problem is linear.
 
-        if ctx.verbose
-            println("VARPRO problem is linear, since length(alpha) = 0")
-        end
+        ctx.verbose && println("VARPRO problem is linear, since length(alpha) = 0")
 
         Jacobian = formJacobian(ctx)
         c = ctx.c
@@ -735,10 +733,10 @@ function formJacobian(ctx)
     ctx.jac[:] = -(ctx.jac1 + ctx.jac2)
 
     if ctx.debug
-        println("VARPRO norm(neglected Jacobian)/norm(Jacobian) = ",
-                     norm(ctx.jac2,"fro")/norm(ctx.jac,"fro"))
         if ctx.neglect
-            println("neglecting Jac2")
+            ctx.verbose && println("VARPRO norm(neglected Jacobian)/norm(Jacobian) = ",
+                                   norm(ctx.jac2,"fro")/norm(ctx.jac,"fro"))
+            ctx.verbose && println("neglecting Jac2")
             ctx.jac[:] = -ctx.jac1
         end
     end
