@@ -320,6 +320,8 @@ function varpro(ctx)
             f(a, r) = f_lsq(a, r, ctx)
             g(a, j) = g_lsq(a, j, ctx)
             iv, v = nl2_set_defaults(mreal, length(alpha_real))
+            iv[MXFCAL] = ctx.mxfcal
+            iv[MXITER] = ctx.mxiter
             iv[PRUNIT] = 0
             if ctx.opto == NL2SOL
                 results = nl2sol(f, g, alpha_real, mreal, iv, v)

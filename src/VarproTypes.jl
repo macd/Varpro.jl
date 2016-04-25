@@ -66,6 +66,8 @@ type FitContext{T<:Number}
     neglect::Bool        # this turns on the Kaufman approximation to the jacobian
     opto::OptoAlgo       # choices are NL2SOL, NL2SNO (fd-jacobian), or LEVENBERG
     verbose::Bool        # More chatty if true
+    mxfcal::Int          # Max number of function call for NL2sol
+    mxiter::Int          # Max iterations for NL2sol
 
     # "Internal" values.  Some are for memory preallocation
     q::Int               # length(alpha)
@@ -130,6 +132,8 @@ function FitContext{T}(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada)
         false,                   # neglect jac2 in jacobian calculation
         NL2SOL,                  # default to nl2sol
         true,                    # default verbose on
+        200,                     # default max func calls for NL2sol
+        500,                     # default max iterations for NL2sol
 
         # "Internals"  
         q,                       # number of nonlinear parameters
