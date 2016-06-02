@@ -97,7 +97,7 @@ end
 function cexp()
     t = collect(-1:.1:20)
     a = [1., 2., 3.]
-    b = [.5im, 1.1im, 2.im]
+    b = [.5im, 1.1im, 2.0im]
     y = sumexp(a, b, t)
     ind = [1 2 3; 1 2 3]
     b_init = [3.2im, 4.3im, 2.4im]
@@ -184,7 +184,7 @@ problems = [rexp,
 # parameters.  The second contains the non-linear parameters.
 correct = [ ([1., 2., 3.], [4., 5., 6.]),          # rexp
             #([1., 2., 3.], [4., 5., 6.]),         # rexp_levenberg
-            ([1., 2., 3.], [.5im, 1.1im, 2.im]),   # cexp
+            ([1., 2., 3.], [.5im, 1.1im, 2.0im]),   # cexp
             ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),   # example
             ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),   # example_levenberg
             ([1.0, 2.0], [1.0 - 1im, 0.8 - 2im]),                          # double_exponential
@@ -235,5 +235,6 @@ function runall()
     return is_good
 end
 
-@test runall()
+# Only run in batch
+!isinteractive() && @test runall()
 
