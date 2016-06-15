@@ -171,30 +171,33 @@ function h1_ringdown()
     ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
 end
 
-problems = [rexp, 
+problems = ["rexp", 
             #rexp_levenberg,  # This fails in lm lapack (underdetermined)
-            cexp, 
-            example, 
-            example_levenberg,
-            double_exponential,
-            ctoo,
-            h1_ringdown]
+            "cexp", 
+            "example", 
+            "example_levenberg",
+            "double_exponential",
+            "ctoo",
+            "h1_ringdown"]
 
 # Expected results.  First member of tuple are the linear
 # parameters.  The second contains the non-linear parameters.
-correct = [ ([1., 2., 3.], [4., 5., 6.]),          # rexp
-            #([1., 2., 3.], [4., 5., 6.]),         # rexp_levenberg
-            ([1., 2., 3.], [.5im, 1.1im, 2.0im]),   # cexp
-            ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),   # example
-            ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),   # example_levenberg
-            ([1.0, 2.0], [1.0 - 1im, 0.8 - 2im]),                          # double_exponential
-            ([1.0, 2.0, 2.0], [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]),
-            ([1.2988144872247045 + 0.703040575467383im, -2.612800387890171 - 2.6628931801021594im,
+correct = Dict{String, Tuple}("rexp" => ([1., 2., 3.], [4., 5., 6.]),
+            "rexp_levenberg" => ([1., 2., 3.], [4., 5., 6.]),
+            "cexp" => ([1., 2., 3.], [.5im, 1.1im, 2.0im]),
+            "example" => ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),
+            "example_levenberg" => ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),
+            "double_exponential" => ([1.0, 2.0], [1.0 - 1im, 0.8 - 2im]),
+            "ctoo" => ([1.0, 2.0, 2.0], [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]),
+            "h1_ringdown" => ([1.2988144872247045 + 0.703040575467383im, -2.612800387890171 - 2.6628931801021594im,
              -2.6127940240198284 + 2.662899576259622im,  1.2988128188986015 - 0.7030455971296943im],
              [112.08302044130967 - 1513.6049949762742im, 297.8042488982426 - 995.3225474551532im,
-              297.80446972855765 + 995.321985942373im,   112.08304556465258 + 1513.6045756970077im])]
+              297.80446972855765 + 995.321985942373im,   112.08304556465258 + 1513.6045756970077im]))
 
-function runone(ctx, name, i)
+function runone(name, sno=false)
+    fctx = eval(Symbol(name))
+    ctx = fctx()
+    sno && (ctx.opto = NL2SNO)
     (alpha, c, wresid, resid_norm, y_est, regression) = try 
         varpro(ctx)
     catch exc
@@ -203,11 +206,11 @@ function runone(ctx, name, i)
         println("Failed: exception raised in $name")
         return false
     end
-    if !isclose(sort(alpha), sort(correct[i][2]))
+    if !isclose(sort(alpha), sort(correct[name][2]))
         is_good = false
         println("Failed: Non-linear parameters out of range on problem $name")
     end
-    if !isclose(sort(c), sort(correct[i][1]))
+    if !isclose(sort(c), sort(correct[name][1]))
         is_good = false
         println("Failed: Linear parameters out of range on problem $name")
     end
@@ -217,18 +220,14 @@ end
 
 function runall()
     is_good = true
-    for (i, p) in enumerate(problems)
-        name = string(p)
-        println("\n---->>> Starting Test $i: $name <<<----")
-        ctx = p()
-        if !runone(ctx, name, i)
+    for p in problems
+        println("\n---->>> Starting Test $p <<<----")
+        if !runone(p)
             is_good = false
         end
         # Well at least one of these fd jacobian runs will trash
         # memory.
-        # ctx = p()
-        # ctx.opto = NL2SNO
-        # if !runone(ctx, name, i)
+        # if !runone(name, true)
         #     is_good = false
         # end
     end
