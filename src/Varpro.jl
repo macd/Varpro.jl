@@ -1,8 +1,8 @@
 module Varpro
 
-using Lexicon
-using Docile
-@document
+#using Lexicon
+#using Docile
+#@document
 
 include("VarproTypes.jl")
 
