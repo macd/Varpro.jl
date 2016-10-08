@@ -425,14 +425,14 @@ function varpro(ctx)
         #     estimated correlation matrix (n+q) x (n+q) for the
         #     parameters.  The linear parameters are ordered
         #     first, followed by the nonlinear parameters.
-        d = 1 ./ sqrt(diag(regression.covmx))
+        d = 1 ./ sqrt.(diag(regression.covmx))
         D = spdiagm(d, 0, n + q, n + q)
         regression.cormx = D * regression.covmx * D
 
         # Compute  regression.std_param:
         #     The k-th element is the square root of the k-th main 
         #     diagonal element of CovMx. 
-        regression.std_param = sqrt(diag(regression.covmx))
+        regression.std_param = sqrt.(diag(regression.covmx))
 
         # Compute  regression.t_ratio:
         #     parameter estimates divided by their standard deviations.
@@ -452,7 +452,7 @@ function varpro(ctx)
         for k = 1:m
             temp[k] = (Qj[k, :] * Qj[k, :]')[1]
         end
-        regression.std_wresid = wresid ./(regression.sigma*sqrt(1-temp))
+        regression.std_wresid = wresid ./(regression.sigma*sqrt.(1-temp))
      end
 
     if ctx.verbose
