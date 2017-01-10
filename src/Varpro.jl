@@ -336,7 +336,7 @@ function varpro(ctx)
         ctx.verbose && @show(results)
         alpha_real[:] = results.minimum[:]
         if ctx.iscomplex
-            ctx.alpha = complex(alpha_real[1:ctx.q], alpha_real[ctx.q+1:end])
+            ctx.alpha = complex.(alpha_real[1:ctx.q], alpha_real[ctx.q+1:end])
         end
         wresid_norm2 = results.f_minimum
         f_lsq(alpha_real, ctx.wresid_real, ctx)
@@ -484,7 +484,7 @@ function update_alpha!(alpha_trial, ctx)
             ctx.alpha_real[i] = alpha_trial[i]
             ctx.alpha_real[i+ctx.q] = alpha_trial[i+ctx.q]
         end
-        ctx.alpha = complex(ctx.alpha_real[1:ctx.q], ctx.alpha_real[ctx.q+1:end])
+        ctx.alpha = complex.(ctx.alpha_real[1:ctx.q], ctx.alpha_real[ctx.q+1:end])
     else
         # again, cannot use a colon assignment here
         for i = 1:ctx.q
