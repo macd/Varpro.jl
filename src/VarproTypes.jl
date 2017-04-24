@@ -19,7 +19,7 @@ macro vget(ctx, args...)
     return Expr(:block, exps...)
 end
 
-type Regression{T<:Number}
+mutable struct Regression{T<:Number}
     sigma::T
     rms::T
     coef_determ::T
@@ -49,7 +49,7 @@ end
 
 
 # We intend T to be either Float64 or Complex128
-type FitContext{T<:Number}
+mutable struct FitContext{T<:Number}
     # Required
     y::Vector{T}         # the m 'measurements'. Can be real or complex
     t::Vector{Float64}   # Independent variable (at m points) and is always real
