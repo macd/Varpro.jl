@@ -1,12 +1,8 @@
 module Varpro
 
-#using Lexicon
-#using Docile
-#@document
-
 include("VarproTypes.jl")
 
-import Optim
+import LsqFit
 using NL2sol
 
 export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
@@ -35,7 +31,7 @@ export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
     different values of the "time" t and given evaluation of phi and 
     (optionally) derivatives of phi.
     
-    Varpro calls either NL2sol, NL2sno (fd Jacobian) or Optim.levenberg_marquardt, 
+    Varpro calls either NL2sol, NL2sno (fd Jacobian) or LsqFit.levenberg_marquardt, 
     which solves a non-linear least squares problem.
 
     What distinguishes varpro from levenberg_marquardt is that, for efficiency and
@@ -44,7 +40,7 @@ export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
     requires an intricate but inexpensive computation of partial 
     derivatives, and this is handled by the varpro function formJacobian.
     
-    levenberg_marquardt is in the Julia Optim package and nl2sol is in the NL2sol
+    levenberg_marquardt is in the Julia LsqFit package and nl2sol is in the NL2sol
     package.  Another solver can be substituted if desired.
     
     The original Fortran implementation of the variable projection 
@@ -309,7 +305,7 @@ function varpro(ctx)
             mreal = ctx.m
         end
         if ctx.opto == LEVENBERG
-            results = Optim.levenberg_marquardt(
+            results = LsqFit.levenberg_marquardt(
                           (a) -> f_lsq(a, ctx.wresid_real, ctx), 
                           (a) -> g_lsq(a, ctx.jac_real, ctx), 
                           alpha_real,
@@ -416,7 +412,7 @@ function varpro(ctx)
             end
         end
         # Uses compact pivoted QR.
-        Qj, Rj, Pj = qr(W*[phi[:, 1:n] J], Val{true}, thin=true)
+        Qj, Rj, Pj = qr(W*[phi[:, 1:n] J], Val(true), thin=true)
         T2 = Rj \ (eye(size(Rj, 1)))
         covmx = sigma2 * T2 * T2'
         regression.covmx[Pj, Pj] = covmx  # Undo the pivoting permutation.
@@ -497,7 +493,7 @@ end
 """
 # Description
     This function is used by a nonlinear least squares solver (both
-    levenberg_marquardt from Optim.jl and NL2SOL have been used) to 
+    levenberg_marquardt from LsqFit.jl and NL2SOL have been used) to 
     compute wresid, the current estimate of the weighted residual 
     (but it is wrapped in a closure first so it is only a function 
      of alpha_trial and wresid).

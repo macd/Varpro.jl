@@ -118,14 +118,14 @@ end
 #      1.0132255e+00    2.4968675e+00    4.0625148e+00 
 # Note that there are many sets of parameters that fit the data well.
 function example()
-    const t = [0; .1; .22; .31; .46; .50; .63; .78; .85; .97]
-    const y = [ 6.9842;  5.1851;  2.8907;  1.4199; -0.2473; 
+    t = [0; .1; .22; .31; .46; .50; .63; .78; .85; .97]
+    y = [ 6.9842;  5.1851;  2.8907;  1.4199; -0.2473; 
                -0.5243; -1.0156; -1.0260; -0.9165; -0.6805]
 
     # The weights for the least squares fit are stored in w.
-    const w = [ 1.0; 1.0; 1.0; 0.5; 0.5; 1.0; 0.5; 1.0; 0.5; 0.5]
+    w = [ 1.0; 1.0; 1.0; 0.5; 0.5; 1.0; 0.5; 1.0; 0.5; 0.5]
     b_init = [0.5; 2; 3]  # initial guess
-    const ind = [1 1 2 2; 2 3 1 2]
+    ind = [1 1 2 2; 2 3 1 2]
     ctx = FitContext(y, t, w, b_init, 2, ind, f_exmpl, g_exmpl)
 end
 
@@ -226,9 +226,9 @@ function runall()
             is_good = false
 	    println("Varpro test $p failed")
         end
-        # Well at least one of these fd jacobian runs will trash
+        # Well at least one of these fd jacobian runs will usually trash
         # memory.
-        # if !runone(name, true)
+        # if !runone(p, true)
         #     is_good = false
         # end
     end

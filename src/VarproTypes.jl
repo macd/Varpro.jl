@@ -92,7 +92,7 @@ mutable struct FitContext{T<:Number}
 end
 
 
-function FitContext{T}(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada)
+function FitContext(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada) where {T}
     if length(size(y)) != 1 || length(size(t)) != 1 || length(size(w)) != 1 || 
        length(size(alpha)) != 1
         error("y, t, w, and alpha must all be vectors")
