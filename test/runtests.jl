@@ -8,13 +8,18 @@
 #    the dimensionality of the problem.  This doesn't always work.
 #
 
+use_installed = "use_installed" in ARGS
+if use_installed
+    using Varpro
+    include(string(Pkg.dir(), "/Varpro/test/helper.jl"))
+else
+    include("../src/Varpro.jl")
+    import Main.Varpro: varpro, FitContext
+    include("./helper.jl")
+end
 
-include("../src/Varpro.jl")
-
-using Varpro
 using Base.Test
 
-include("./helper.jl")
 
 # Generate synthetic data to fit to a sum of exponentials
 function sumexp(a, b, t)
