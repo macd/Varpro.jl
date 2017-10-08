@@ -2,7 +2,9 @@ module Varpro
 
 include("VarproTypes.jl")
 
-import LsqFit
+use_levenberg = "use_levenberg" in ARGS
+use_levenberg && using LsqFit.levenberg_marquardt
+
 using NL2sol
 
 export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
@@ -375,7 +377,7 @@ function varpro(ctx)
 
     w = diag(W)
     y_bar = sum(w.*y) / sum(w)
-    CTTS = norm(W * (y - y_bar)) ^ 2
+    CTTS = norm(W * (y .- y_bar)) ^ 2
     regression.coef_determ = 1 - wresid_norm^2 / CTTS
 
     # Compute  regression.RMS = sigma^2:
@@ -448,7 +450,7 @@ function varpro(ctx)
         for k = 1:m
             temp[k] = (Qj[k, :] * Qj[k, :]')[1]
         end
-        regression.std_wresid = wresid ./(regression.sigma*sqrt.(1-temp))
+        regression.std_wresid = wresid ./(regression.sigma*sqrt.(1 .- temp))
      end
 
     if ctx.verbose

@@ -1,6 +1,6 @@
 # Varpro: Variable Projection for Nonlinear Least Squares Problems
 
-NB: This is a work in progress...
+NB: This is a work in progress... Currently only running in 0.7+
 
 Model fitting is often approached as an optimization problem where the
 sum of the model errors are minimized by optimizing the model

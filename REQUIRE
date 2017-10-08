@@ -1,7 +1,4 @@
-julia 0.4-
-Lexicon
-Docile
-Optim
+julia 0.7-
 Formatting
-DataFrames
 NL2sol
+#LsqFit  # only for comparisons

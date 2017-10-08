@@ -18,7 +18,7 @@ else
     include("./helper.jl")
 end
 
-using Base.Test
+using Test
 
 
 # Generate synthetic data to fit to a sum of exponentials
