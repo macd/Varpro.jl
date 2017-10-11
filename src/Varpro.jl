@@ -424,7 +424,7 @@ function varpro(ctx)
         #     parameters.  The linear parameters are ordered
         #     first, followed by the nonlinear parameters.
         d = 1 ./ sqrt.(diag(regression.covmx))
-        D = spdiagm(d, 0, n + q, n + q)
+        D = spdiagm(0 => d)
         regression.cormx = D * regression.covmx * D
 
         # Compute  regression.std_param:
