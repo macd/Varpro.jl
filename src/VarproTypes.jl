@@ -119,7 +119,7 @@ function FitContext(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada) whe
         # required
         y,                       # sample values to be fit
         t,                       # independent variable
-        diagm(w),                # weight matrix  (TODO: matlab code used spdiagm(w, 0, m, m))
+        diagm(0 => w),                # weight matrix  (TODO: matlab code used spdiagm(w, 0, m, m))
         alpha,                   # current estimate on non-linear parameters
         n,                       # n
         ind,                     # ind::Matrix{Int}  constant integer matrix 

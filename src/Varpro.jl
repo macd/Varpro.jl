@@ -727,7 +727,7 @@ function formJacobian(ctx)
     end
 
     ctx.jac1[:] = ctx.U[:, ctx.rank+1:ctx.m] * (ctx.U[:, ctx.rank+1:ctx.m]' * ctx.jac1)
-    T2 = diagm(1 ./ ctx.s[1:ctx.rank]) * (ctx.V[:, 1:ctx.rank]' * T2[1:ctx.n, :])
+    T2 = diagm(0 => 1 ./ ctx.s[1:ctx.rank]) * (ctx.V[:, 1:ctx.rank]' * T2[1:ctx.n, :])
     ctx.jac2[:] = ctx.U[:, 1:ctx.rank] * T2
 
     ctx.jac[:] = -(ctx.jac1 + ctx.jac2)
