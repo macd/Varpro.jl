@@ -414,7 +414,7 @@ function varpro(ctx)
             end
         end
         # Uses compact pivoted QR.
-        Qj, Rj, Pj = qr(W*[phi[:, 1:n] J], Val(true), thin=true)
+        Qj, Rj, Pj = qr(W*[phi[:, 1:n] J], Val(true), full=false)
         T2 = Rj \ (eye(size(Rj, 1)))
         covmx = sigma2 * T2 * T2'
         regression.covmx[Pj, Pj] = covmx  # Undo the pivoting permutation.
@@ -542,7 +542,7 @@ function f_lsq(alpha_trial, r, ctx)
     #      rank     1 x 1 the rank of the matrix W*phi.
 
     ctx.phi = ctx.ada(ctx.alpha, ctx)
-    U, S, V = svd(W * ctx.phi[:, 1:ctx.n], thin=false)
+    U, S, V = svd(W * ctx.phi[:, 1:ctx.n], full=true)
     ctx.U = U
     ctx.s = S
     ctx.V = V
