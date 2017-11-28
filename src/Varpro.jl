@@ -9,6 +9,7 @@ using NL2sol
 
 export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
 
+eye(n) = Matrix(1.0I, n, n)
 
 """
   # Description
