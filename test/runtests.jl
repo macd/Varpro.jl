@@ -7,18 +7,26 @@
 #    regularizing by throwing away small singular values and reducing
 #    the dimensionality of the problem.  This doesn't always work.
 #
+using DelimitedFiles
 
 use_installed = "use_installed" in ARGS
 if use_installed
     using Varpro
-    include(string(Pkg.dir(), "/Varpro/test/helper.jl"))
 else
     include("../src/Varpro.jl")
+    #include("../src/VarproTypes.jl")
     import Main.Varpro: varpro, FitContext
-    include("./helper.jl")
 end
 
 using Test
+
+
+# OK, this hack is just so we get a consistent ordering on the complex
+# numbers.
+import Base: isless
+function isless(x::Complex, y::Complex)
+    return abs(x) < abs(y)
+end
 
 
 # Generate synthetic data to fit to a sum of exponentials
@@ -211,11 +219,11 @@ function runone(name, sno=false)
         println("Failed: exception raised in $name")
         return false
     end
-    if !isclose(sort(alpha), sort(correct[name][2]))
+    if !isapprox(sort(alpha), sort(correct[name][2]))
         is_good = false
         println("Failed: Non-linear parameters out of range on problem $name")
     end
-    if !isclose(sort(c), sort(correct[name][1]))
+    if !isapprox(sort(c), sort(correct[name][1]))
         is_good = false
         println("Failed: Linear parameters out of range on problem $name")
     end

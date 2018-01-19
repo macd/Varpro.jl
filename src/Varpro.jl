@@ -1,4 +1,6 @@
 module Varpro
+using LinearAlgebra
+using SparseArrays
 
 include("VarproTypes.jl")
 
@@ -551,7 +553,8 @@ function f_lsq(alpha_trial, r, ctx)
     if ctx.n > 0
         s = S   
     else    #  n = 0
-        ctx.c = ctx.iscomplex ? Complex128[] : Float64[]
+        
+        ctx.c = ctx.iscomplex ? Base.Complex{Float64}[] : Float64[]
         ctx.y_est[:] = ctx.phi[:]
         ctx.wresid[:] = W * (y - ctx.y_est)
         r[:] = ctx.wresid[:]
