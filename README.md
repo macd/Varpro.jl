@@ -21,7 +21,7 @@ essentially the L2 norm of the residual (error) vector).
 
 ## Usage
 
-The best way to learn how to use varpro is to read reference [1].  The usage
+The best way to learn how to use varpro is to read reference [4].  The usage
 in Julia differs somewhat from the MATLAB version.  With this version, we
 first set up a FitContext by calling the constructor as in the following
 
