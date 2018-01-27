@@ -32,7 +32,7 @@ fit sampled at the times **t**.  The vector **w** is a weight vector for selecti
 weighting the data. The vector **x\_init** is the starting guess.  Note that both
 **y** and **x\_init** can be either real or complex, but they both must share the same
 type.  The integer **n** is the number of basis functions (ie the number of linear
-parameters).  The matrix **ind** specifies the structure of the dphi matrix (see [1]).
+parameters).  The matrix **ind** specifies the structure of the dphi matrix (see [4]).
 The functions **f\_exp** and **g\_exp** calculate the phi and dphi matrices.
 
 The following is a complete example of fitting the H1 strain ringdown values of the 
