@@ -15,7 +15,7 @@ if use_installed
 else
     include("../src/Varpro.jl")
     #include("../src/VarproTypes.jl")
-    import Main.Varpro: varpro, FitContext
+    import .Varpro: varpro, FitContext
 end
 
 using Test
