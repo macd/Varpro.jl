@@ -724,7 +724,7 @@ function formJacobian(ctx)
     #   to complete the computation of Jac2.
     #   Note: if n1 > n, last row of T2 is not needed.   
     for j = 1:ctx.q                            # for each nonlinear parameter alpha[j]
-        range = find(ctx.ind[2, :] .== j)      # columns of Wdphi relevant to alpha[j]
+        range = findall(ctx.ind[2, :] .== j)   # columns of Wdphi relevant to alpha[j]
         indrows = vec(ctx.ind[1, range])       # relevant rows of ctemp, need as vector
         ctx.jac1[:, j] = Wdphi[:, range] * ctemp[indrows]
         T2[indrows, j] = Wdphi_r[range]
