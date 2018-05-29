@@ -60,7 +60,7 @@ recently discovered gravity wave GW150914 [5].
     function exp_fit(n, y, t)
         w = ones(length(t))
         ind = [collect(1:n)'; collect(1:n)']
-        x_init = complex(0.1*rand(n), 2.0*rand(n))  
+        x_init = complex.(0.1*rand(n), 2.0*rand(n))  
         ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
         (alpha, c, wresid, resid_norm, y_est, regression) = varpro(ctx)
     end
@@ -68,7 +68,7 @@ recently discovered gravity wave GW150914 [5].
     function main()
         h1 = readdlm("h1_whitened.txt")
         t = h1[:, 1]
-        y = complex(h1[:, 2])  # must be complex to match x_init
+        y = complex.(h1[:, 2])  # must be complex to match x_init
         x, c, r, r_norm, y_est, reg = exp_fit(6, y, t)
         println("Norm of residual error: ", r_norm)
         plot(t, real(y), "o", label="measured H1 strain")
