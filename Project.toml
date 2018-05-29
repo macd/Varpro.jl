@@ -1,0 +1,8 @@
+authors = ["Don MacMillen <don@macmillen.net>"]
+name = "Varpro"
+uuid = "ad47e2ae-6390-11e8-3558-e91f8c28af54"
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

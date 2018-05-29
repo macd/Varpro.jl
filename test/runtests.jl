@@ -14,7 +14,6 @@ if use_installed
     using Varpro
 else
     include("../src/Varpro.jl")
-    #include("../src/VarproTypes.jl")
     import .Varpro: varpro, FitContext
 end
 
@@ -22,11 +21,8 @@ using Test
 
 
 # OK, this hack is just so we get a consistent ordering on the complex
-# numbers.
-import Base: isless
-function isless(x::Complex, y::Complex)
-    return abs(x) < abs(y)
-end
+# numbers... I think this qualifies as type piracy (arrrgh!)
+Base.isless(x::Complex, y::Complex) = abs(x) < abs(y)
 
 
 # Generate synthetic data to fit to a sum of exponentials

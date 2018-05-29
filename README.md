@@ -1,7 +1,5 @@
 # Varpro: Variable Projection for Nonlinear Least Squares Problems
 
-NB: This is a work in progress... Currently only running in 0.7+
-
 Model fitting is often approached as an optimization problem where the
 sum of the model errors are minimized by optimizing the model
 parameters.  If some of the model parameters are non-linear, then a
@@ -89,6 +87,10 @@ The above code produces the following figure:
 ![alt-text][ringdown]
 
 [ringdown]: modeled_GW150914_strain.png "Greetings Programs!"
+
+## Limitations
+
+Only supported in Julia 0.7 (dev)
 
 ## References
 

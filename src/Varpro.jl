@@ -4,6 +4,9 @@ using SparseArrays
 
 include("VarproTypes.jl")
 
+# So adding LsqFit will pull in an astounding 47 additional
+# packages.  Many have yet to be ported to 0.7, so I am not
+# adding the LsqFit to the Project [deps]
 use_levenberg = "use_levenberg" in ARGS
 use_levenberg && using LsqFit.levenberg_marquardt
 
@@ -417,7 +420,10 @@ function varpro(ctx)
             end
         end
         # Uses compact pivoted QR.
-        Qj, Rj, Pj = qr(W*[phi[:, 1:n] J], Val(true), full=false)
+        F = qr(W*[phi[:, 1:n] J], Val(true))
+        Qj = F.Q
+        Rj = F.R
+        Pj = F.p
         T2 = Rj \ (eye(size(Rj, 1)))
         covmx = sigma2 * T2 * T2'
         regression.covmx[Pj, Pj] = covmx  # Undo the pivoting permutation.
