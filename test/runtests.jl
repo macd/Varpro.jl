@@ -159,7 +159,7 @@ end
 # Here we fit complex data
 function ctoo()
     n = 1000
-    t = collect(linspace(0.0, 4pi, n))
+    t = collect(range(0.0; stop=4pi, length=n))
     a = [1., 2., 2.]
     b = [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]
     y = sumexp(a, b, t)
