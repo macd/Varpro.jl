@@ -39,10 +39,11 @@ recently discovered gravity wave GW150914 [5].
 
     using Varpro
     using PyPlot
-
+    using DelimitedFiles
+    
     function f_exp(alpha, ctx)
-        for i in 1:ctx.m
-            for j = 1:ctx.n
+        for j = 1:ctx.n
+            for i in 1:ctx.m
                 ctx.phi[i, j] = exp(-alpha[j] * ctx.t[i])
             end
         end
