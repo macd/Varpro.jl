@@ -292,7 +292,7 @@ eye(n) = Matrix(1.0I, n, n)
 
 """
 function varpro(ctx)
-    (y, W, q, m, n1, n) =  (ctx.y, ctx.w, ctx.q, ctx.m, ctx.n1, ctx.n)
+    y, W, q, m, n1, n =  ctx.y, ctx.w, ctx.q, ctx.m, ctx.n1, ctx.n
 
     T = eltype(ctx.alpha)
     nl2_msg = ""
@@ -338,15 +338,15 @@ function varpro(ctx)
 
         ctx.verbose && println(nl2_msg)
         ctx.verbose && @show(results)
-        alpha_real[:] = results.minimum[:]
+        alpha_real .= results.minimum
         if ctx.iscomplex
-            ctx.alpha = complex.(alpha_real[1:ctx.q], alpha_real[ctx.q+1:end])
+            ctx.alpha .= complex.(alpha_real[1:ctx.q], alpha_real[ctx.q+1:end])  ## cwt barks here
         end
         wresid_norm2 = results.f_minimum
         f_lsq(alpha_real, ctx.wresid_real, ctx)
         g_lsq(alpha_real, ctx.jac_real,  ctx)
-        r, Jacobian, phi, dphi, y_est = (ctx.wresid, ctx.jac, ctx.phi, 
-                                               ctx.dphi, ctx.y_est)
+        r, Jacobian, phi, dphi, y_est = ctx.wresid, ctx.jac, ctx.phi, ctx.dphi, ctx.y_est
+                                               
         wresid = r
         wresid_norm = sqrt(wresid_norm2)
         regression.results = results
@@ -498,6 +498,7 @@ function update_alpha!(alpha_trial, ctx)
             ctx.alpha[i] = alpha_trial[i]
         end
     end
+    return nothing
 end
 
 
@@ -542,7 +543,7 @@ function f_lsq(alpha_trial, r, ctx)
     #    min_{c} || W resid ||.
     #       resid =  y - phi * c.
     #
-    # If W*phi has any singular value less than m * its largest singular value, 
+    # If W*phi has any singular value less than m * eps() its largest singular value, 
     # these singular values are set to zero.
     # The following values on stored on the FitContext:
     #      c        n x 1 the optimal linear parameters for this choice of alpha.
@@ -561,9 +562,9 @@ function f_lsq(alpha_trial, r, ctx)
     else    #  n = 0
         
         ctx.c = ctx.iscomplex ? Base.Complex{Float64}[] : Float64[]
-        ctx.y_est[:] = ctx.phi[:]
-        ctx.wresid[:] = W * (y - ctx.y_est)
-        r[:] = ctx.wresid[:]
+        ctx.y_est .= ctx.phi
+        ctx.wresid .= W * (y - ctx.y_est)
+        r .= ctx.wresid
         ctx.rank = 1
         return ctx.wresid
     end
@@ -597,7 +598,7 @@ function f_lsq(alpha_trial, r, ctx)
         ctx.wresid_real[1:ctx.m] = real(ctx.wresid)
         ctx.wresid_real[ctx.m+1:end] = imag(ctx.wresid)
     else
-        ctx.wresid_real[:] = ctx.wresid[:]
+        ctx.wresid_real .= ctx.wresid
     end
 
     # Set r[:] for NL2sol. This is unrolled because r might be an NL2Array
@@ -736,18 +737,18 @@ function formJacobian(ctx)
         T2[indrows, j] = Wdphi_r[range]
     end
 
-    ctx.jac1[:] = ctx.U[:, ctx.rank+1:ctx.m] * (ctx.U[:, ctx.rank+1:ctx.m]' * ctx.jac1)
+    ctx.jac1 .= ctx.U[:, ctx.rank+1:ctx.m] * (ctx.U[:, ctx.rank+1:ctx.m]' * ctx.jac1)
     T2 = diagm(0 => 1 ./ ctx.s[1:ctx.rank]) * (ctx.V[:, 1:ctx.rank]' * T2[1:ctx.n, :])
-    ctx.jac2[:] = ctx.U[:, 1:ctx.rank] * T2
+    ctx.jac2 .= ctx.U[:, 1:ctx.rank] * T2
 
-    ctx.jac[:] = -(ctx.jac1 + ctx.jac2)
+    ctx.jac .= -(ctx.jac1 + ctx.jac2)
 
     if ctx.debug
         if ctx.neglect
             ctx.verbose && println("VARPRO norm(neglected Jacobian)/norm(Jacobian) = ",
                                    norm(ctx.jac2,"fro")/norm(ctx.jac,"fro"))
             ctx.verbose && println("neglecting Jac2")
-            ctx.jac[:] = -ctx.jac1
+            ctx.jac .= -ctx.jac1
         end
     end
     return ctx.jac

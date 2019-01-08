@@ -9,21 +9,11 @@
 #
 using DelimitedFiles
 
-use_installed = "use_installed" in ARGS
-if use_installed
-    using Varpro
-else
-    include("../src/Varpro.jl")
-    import .Varpro: varpro, FitContext
-end
+include("../src/Varpro.jl")
+import .Varpro: varpro, FitContext
 
 using Test
-
-
-# OK, this hack is just so we get a consistent ordering on the complex
-# numbers... I think this qualifies as type piracy (arrrgh!)
-Base.isless(x::Complex, y::Complex) = abs(x) < abs(y)
-
+using Random
 
 # Generate synthetic data to fit to a sum of exponentials
 function sumexp(a, b, t)
@@ -96,11 +86,6 @@ function rexp()
     ctx = FitContext(y, t, w, b_init, 3, ind, f_exp, g_exp)
 end
 
-function rexp_levenberg()
-    ctx = rexp()
-    ctx.opto = LEVENBERG
-    ctx
-end
 
 # Here we fit complex data
 function cexp()
@@ -138,12 +123,6 @@ function example()
     ctx = FitContext(y, t, w, b_init, 2, ind, f_exmpl, g_exmpl)
 end
 
-function example_levenberg()
-    ctx = example()
-    ctx.opto = LEVENBERG
-    ctx
-end
-
 # This is a very simple double complex exponential with no noise.
 function double_exponential()
     t = collect(0:.05:10)
@@ -176,74 +155,57 @@ function h1_ringdown()
     y = complex.(h1[:, 2])  # must be complex to match x_init
     w = ones(length(t))
     ind = [collect(1:n)'; collect(1:n)']
-    x_init = complex.(0.1*ones(n), 2.0*ones(n))  
+    rng = MersenneTwister(99)
+    x_init = complex.(0.1*rand(rng, n), 2.0*rand(rng, n))  
     ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
 end
 
-problems = ["rexp", 
-            #rexp_levenberg,  # This fails in lm lapack (underdetermined)
-            "cexp", 
-            "example", 
-            #"example_levenberg",  # failing in levenberg_marquardt check later
-            "double_exponential",
-            "ctoo",
-            "h1_ringdown"]
-
 # Expected results.  First member of tuple are the linear
 # parameters.  The second contains the non-linear parameters.
-correct = Dict{String, Tuple}("rexp" => ([1., 2., 3.], [4., 5., 6.]),
-            "rexp_levenberg" => ([1., 2., 3.], [4., 5., 6.]),
-            "cexp" => ([1., 2., 3.], [.5im, 1.1im, 2.0im]),
-            "example" => ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),
-            "example_levenberg" => ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),
-            "double_exponential" => ([1.0, 2.0], [1.0 - 1im, 0.8 - 2im]),
-            "ctoo" => ([1.0, 2.0, 2.0], [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]),
-            "h1_ringdown" => ([1.2988144872247045 + 0.703040575467383im, -2.612800387890171 - 2.6628931801021594im,
-             -2.6127940240198284 + 2.662899576259622im,  1.2988128188986015 - 0.7030455971296943im],
-             [112.08302044130967 - 1513.6049949762742im, 297.8042488982426 - 995.3225474551532im,
-              297.80446972855765 + 995.321985942373im,   112.08304556465258 + 1513.6045756970077im]))
+correct = Dict{Function, Tuple}(rexp => ([1., 2., 3.], [4., 5., 6.]),
+            cexp => ([1., 2., 3.], [.5im, 1.1im, 2.0im]),
+            example => ([5.8416357, 1.1436854], [1.0132255, 2.4968675, 4.0625148]),
+            double_exponential => ([1.0, 2.0], [1.0 - 1im, 0.8 - 2im]),
+            ctoo => ([1.0, 2.0, 2.0], [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]),
+            h1_ringdown => ([1.29881 + 0.70304im, -2.6128 - 2.66289im,
+                            -2.6128 + 2.66289im,  1.29881 - 0.70304im],
+                            [112.083 - 1513.604im, 297.804 - 995.322im,
+                             297.804 + 995.322im,   112.083 + 1513.604im]))
 
-function runone(name, sno=false)
-    fctx = eval(Symbol(name))
-    ctx = fctx()
+# a bogus lessthan for complex numbers so we get (hopefully) consistent ordering
+const clt = (x, y) -> isapprox(real(x), real(y), atol=1e-10) ? imag(x) < imag(y) : real(x) < real(y)
+
+function runone(mkctx; sno=false, verbose=false, atol=0.0)
+    ctx = mkctx()
+    ctx.verbose = verbose
     sno && (ctx.opto = NL2SNO)
     (alpha, c, wresid, resid_norm, y_est, regression) = try 
         varpro(ctx)
     catch exc
-        is_good = false
         println("Exception: ", exc)
-        println("Failed: exception raised in $name")
+        println("Failed: exception raised in $(string(mkctx))")
         return false
     end
-    if !isapprox(sort(alpha), sort(correct[name][2]))
-        is_good = false
-        println("Failed: Non-linear parameters out of range on problem $name")
+    if !isapprox(sort(alpha, lt=clt), sort(correct[mkctx][2], lt=clt), atol=atol)
+        println("Failed: Non-linear parameters out of range on problem $(string(mkctx))")
+        return false
     end
-    if !isapprox(sort(c), sort(correct[name][1]))
-        is_good = false
-        println("Failed: Linear parameters out of range on problem $name")
+    if !isapprox(sort(c, lt=clt), sort(correct[mkctx][1], lt=clt), atol=atol)
+        println("Failed: Linear parameters out of range on problem $(string(mkctx))")
+        return false
     end
     return true
 end
 
 
-function runall()
-    is_good = true
-    for p in problems
-        println("\n---->>> Starting Test $p <<<----")
-        if !runone(p)
-            is_good = false
-	    println("Varpro test $p failed")
-        end
-        # Well at least one of these fd jacobian runs will usually trash
-        # memory.
-        # if !runone(p, true)
-        #     is_good = false
-        # end
-    end
-    return is_good
+@testset "Varpro" begin
+
+    verbose = true
+    @test runone(rexp, verbose=verbose) == true
+    @test runone(cexp, verbose=verbose) == true
+    @test runone(example, verbose=verbose, atol=1e-4) == true
+    @test runone(double_exponential, verbose=verbose) == true
+    @test runone(ctoo, verbose=verbose) == true
+    @test runone(h1_ringdown, verbose=verbose, atol=1e-2) == true
+
 end
-
-# Only run in batch
-!isinteractive() && @test runall()
-
