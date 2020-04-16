@@ -4,15 +4,9 @@ using SparseArrays
 
 include("VarproTypes.jl")
 
-# So adding LsqFit will pull in an astounding 47 additional
-# packages.  Many have yet to be ported to 0.7, so I am not
-# adding the LsqFit to the Project [deps]
-use_levenberg = "use_levenberg" in ARGS
-use_levenberg && using LsqFit.levenberg_marquardt
-
 using NL2sol
 
-export varpro, FitContext, NL2SOL, NL2SNO, LEVENBERG
+export varpro, FitContext, NL2SOL, NL2SNO
 
 eye(n) = Matrix(1.0I, n, n)
 
@@ -39,17 +33,16 @@ eye(n) = Matrix(1.0I, n, n)
     different values of the "time" t and given evaluation of phi and 
     (optionally) derivatives of phi.
     
-    Varpro calls either NL2sol, NL2sno (fd Jacobian) or LsqFit.levenberg_marquardt, 
-    which solves a non-linear least squares problem.
+    Varpro calls either NL2sol, NL2sno (fd Jacobian) which solves a 
+    non-linear least squares problem.
 
     What distinguishes varpro from levenberg_marquardt is that, for efficiency and
-    reliability, varpro causes levenberg_marquardt to only iterate on the
+    reliability, varpro causes the nonlinear solver NL2sol to only iterate on the
     nonlinear parameters.  Given the information in phi and dphi, this 
     requires an intricate but inexpensive computation of partial 
     derivatives, and this is handled by the varpro function formJacobian.
     
-    levenberg_marquardt is in the Julia LsqFit package and nl2sol is in the NL2sol
-    package.  Another solver can be substituted if desired.
+    nl2sol is in the NL2sol.jl package.
     
     The original Fortran implementation of the variable projection 
     algorithm (ref. 2) was modified in 1977 by John Bolstad 
@@ -298,7 +291,7 @@ function varpro(ctx)
     nl2_msg = ""
 
     #
-    # Solve the least squares problem using levenberg_marquardt or, if there
+    # Solve the least squares problem using NL2sol or, if there
     # are no nonlinear parameters, using the SVD procedure in formJacobian.
     #
     regression = Regression(T, q, n, m)
@@ -312,28 +305,19 @@ function varpro(ctx)
             alpha_real = ctx.alpha
             mreal = ctx.m
         end
-        if ctx.opto == LEVENBERG
-            results = LsqFit.levenberg_marquardt(
-                          (a) -> f_lsq(a, ctx.wresid_real, ctx), 
-                          (a) -> g_lsq(a, ctx.jac_real, ctx), 
-                          alpha_real,
-                          tolG=1e-15,
-                          maxIter=400
-                      )
-        else 
-            f(a, r) = f_lsq(a, r, ctx)
-            g(a, j) = g_lsq(a, j, ctx)
-            iv, v = nl2_set_defaults(mreal, length(alpha_real))
-            iv[MXFCAL] = ctx.mxfcal
-            iv[MXITER] = ctx.mxiter
-            iv[PRUNIT] = 0
-            if ctx.opto == NL2SOL
-                results = nl2sol(f, g, alpha_real, mreal, iv, v)
-                ctx.verbose && println("\nNL2sol return code: ", return_code[iv[1]])
-            else
-                results = nl2sno(f, alpha_real, mreal, iv, v)
-                ctx.verbose && println("\nNL2sno return code: ", return_code[iv[1]])
-            end
+
+        f(a, r) = f_lsq(a, r, ctx)
+        g(a, j) = g_lsq(a, j, ctx)
+        iv, v = nl2_set_defaults(mreal, length(alpha_real))
+        iv[MXFCAL] = ctx.mxfcal
+        iv[MXITER] = ctx.mxiter
+        iv[PRUNIT] = 0
+        if ctx.opto == NL2SOL
+            results = nl2sol(f, g, alpha_real, mreal, iv, v)
+            ctx.verbose && println("\nNL2sol return code: ", return_code[iv[1]])
+        else
+            results = nl2sno(f, alpha_real, mreal, iv, v)
+            ctx.verbose && println("\nNL2sno return code: ", return_code[iv[1]])
         end
 
         ctx.verbose && println(nl2_msg)
@@ -504,9 +488,8 @@ end
 
 """
 # Description
-    This function is used by a nonlinear least squares solver (both
-    levenberg_marquardt from LsqFit.jl and NL2SOL have been used) to 
-    compute wresid, the current estimate of the weighted residual 
+    This function is used by a nonlinear least squares solver NL2sol
+    to compute wresid, the current estimate of the weighted residual 
     (but it is wrapped in a closure first so it is only a function 
      of alpha_trial and wresid).
 

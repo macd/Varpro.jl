@@ -1,23 +1,7 @@
 # As of this date (May 2016) nl2sno (finite difference calc of jacobian)
 # is still encountering random memory corruption issues.  Use at you own
 # risk...
-@enum OptoAlgo  NL2SOL NL2SNO LEVENBERG
-
-
-# What this macro does:
-# Given an instance ctx of a type T with fields a, b, c, etc, it will
-# make local variables a = ctx.a, b = ctx.b, etc by using the
-# syntax    @vget(ctx, a, b, c)
-# No error checking to see if a, b, and c are, in fact,
-# fields of the type T.  Didn't use in Varpro
-#
-macro vget(ctx, args...)
-    exps = []
-    for i in 1:length(args)
-        push!(exps, :($(esc(args[i])) = $ctx.($args[$i])))
-    end
-    return Expr(:block, exps...)
-end
+@enum OptoAlgo  NL2SOL NL2SNO
 
 mutable struct Regression{T<:Number}
     sigma::T

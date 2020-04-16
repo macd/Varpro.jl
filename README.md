@@ -91,7 +91,7 @@ The above code produces the following figure:
 
 ## Limitations
 
-Only supported in Julia 0.7 (dev)
+Only supported in Julia 1.4 and later.
 
 ## References
 

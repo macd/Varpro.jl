@@ -10,7 +10,7 @@
 using DelimitedFiles
 
 include("../src/Varpro.jl")
-import .Varpro: varpro, FitContext
+import .Varpro: varpro, FitContext, OptoAlgo
 
 using Test
 using Random
@@ -155,7 +155,7 @@ function h1_ringdown()
     y = complex.(h1[:, 2])  # must be complex to match x_init
     w = ones(length(t))
     ind = [collect(1:n)'; collect(1:n)']
-    rng = MersenneTwister(99)
+    rng = MersenneTwister(137)
     x_init = complex.(0.1*rand(rng, n), 2.0*rand(rng, n))  
     ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
 end
@@ -173,7 +173,7 @@ correct = Dict{Function, Tuple}(rexp => ([1., 2., 3.], [4., 5., 6.]),
                              297.804 + 995.322im,   112.083 + 1513.604im]))
 
 # a bogus lessthan for complex numbers so we get (hopefully) consistent ordering
-const clt = (x, y) -> isapprox(real(x), real(y), atol=1e-10) ? imag(x) < imag(y) : real(x) < real(y)
+const clt = (x, y) -> isapprox(real(x), real(y), atol=1e-4) ? imag(x) < imag(y) : real(x) < real(y)
 
 function runone(mkctx; sno=false, verbose=false, atol=0.0)
     ctx = mkctx()
@@ -188,10 +188,14 @@ function runone(mkctx; sno=false, verbose=false, atol=0.0)
     end
     if !isapprox(sort(alpha, lt=clt), sort(correct[mkctx][2], lt=clt), atol=atol)
         println("Failed: Non-linear parameters out of range on problem $(string(mkctx))")
+        println("        got: ", sort(alpha, lt=clt))
+        println("   expected: ", sort(correct[mkctx][2], lt=clt))
         return false
     end
     if !isapprox(sort(c, lt=clt), sort(correct[mkctx][1], lt=clt), atol=atol)
         println("Failed: Linear parameters out of range on problem $(string(mkctx))")
+        println("        got: ", sort(c, lt=clt))
+        println("   expected: ", sort(correct[mkctx][1], lt=clt))
         return false
     end
     return true
