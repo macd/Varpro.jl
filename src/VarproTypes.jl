@@ -73,6 +73,7 @@ mutable struct FitContext{T<:Number}
     alpha_real::Vector{Float64}
     wresid_real::Vector{Float64}
     jac_real::Matrix{Float64}
+    skip_stats::Bool          # skip all the stats stuff
 end
 
 
@@ -142,6 +143,7 @@ function FitContext(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada) whe
         zeros(Float64, T <: Complex ? 2*n : n),                         # alpha_real
         zeros(Float64, T <: Complex ? 2*m : m),                         # wresid_real
         zeros(Float64, T <: Complex ? 2*m : m, T <: Complex ? 2*size(ind,2) : 
-              size(ind,2))  # jac_real
+              size(ind,2)),  # jac_real
+        false
     )
 end

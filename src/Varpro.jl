@@ -376,13 +376,7 @@ function varpro(ctx)
 
     regression.rms = sigma2
 
-    if isempty(dphi)
-        regression.covmx = []
-        regression.cormx = []
-        regression.std_param = []
-        regression.t_ratio = []
-        regression.standardized_wresid = []
-    else
+    if !isempty(dphi) && !ctx.skip_stats
         # Calculate the covariance matrix CovMx, which is sigma^2 times the
         # inverse of H'*H, where  
         #              H = W*[phi,J] 

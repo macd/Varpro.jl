@@ -4,7 +4,7 @@ Model fitting is often approached as an optimization problem where the
 sum of the model errors are minimized by optimizing the model
 parameters.  If some of the model parameters are non-linear, then a
 non-linear optimization algorithm must be used.  This can be
-inefficient if some of the parameters are linear.
+inefficient if some of the parameters are, in fact, linear.
 
 The Varpro algorithm recasts the problem so that only the nonlinear
 parameters need to be considered by the nonlinear optimizer.  For more
@@ -19,22 +19,26 @@ essentially the L2 norm of the residual (error) vector).
 
 ## Usage
 
-The best way to learn how to use varpro is to read reference [4].  The usage
+The best way to learn how to use Varpro is to read reference [4].  The usage
 in Julia differs somewhat from the MATLAB version.  With this version, we
 first set up a FitContext by calling the constructor as in the following
 
     ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
 
-All of these are required parameters.  The vector **y** is the data we wish to
-fit sampled at the times **t**.  The vector **w** is a weight vector for selectively
-weighting the data. The vector **x\_init** is the starting guess.  Note that both
-**y** and **x\_init** can be either real or complex, but they both must share the same
-type.  The integer **n** is the number of basis functions (ie the number of linear
-parameters).  The matrix **ind** specifies the structure of the dphi matrix (see [4]).
-The functions **f\_exp** and **g\_exp** calculate the phi and dphi matrices.
+All of these are required parameters.  The vector **y** is the data we
+wish to fit sampled at the times **t** (or whatever is the independent
+variable).  The vector **w** is a weight vector for selectively
+weighting the data, all ones is usually a good first step. The vector
+**x\_init** is the starting guess for the nonlinear parameters.  Note
+that both **y** and **x\_init** can be either real or complex, but
+they both must share the same type.  The integer **n** is the number
+of basis functions, which is also the number of linear parameters.
+The matrix **ind** specifies the structure of the dphi matrix (see
+[4]).  The functions **f\_exp** and **g\_exp** calculate the phi and
+dphi matrices.
 
-The following is a complete example of fitting the H1 strain ringdown values of the 
-recently discovered gravity wave GW150914 [5].
+The following is a complete example of fitting the H1 strain ringdown
+values of the recently discovered gravity wave GW150914 [5].
 
 
     using Varpro
@@ -92,6 +96,14 @@ The above code produces the following figure:
 ## Limitations
 
 Only supported in Julia 1.4 and later.
+
+If you are fitting a sum of exponentials, a common use case for
+Varpro, note that it can be a tricky business. If the optimzer takes a
+step too large in one parameter, the other parameters may be swamped
+and the problem doesn't have full rank at the current value of x.
+Varpro tries to take care of this with the SVD and then regularizing
+by throwing away small singular values and reducing the dimensionality
+of the problem.  This doesn't always work.
 
 ## References
 
