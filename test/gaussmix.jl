@@ -76,7 +76,6 @@ function testgauss(;verbose=true)
     ctx.skip_stats = true
     ctx.verbose = verbose
     alpha, cfit, wresid, resid_norm, y_est, reg = varpro(ctx)
-    # we only check the linear parameters because I'm lazy
-    return all(isapprox.(cc, sort(cfit)))
+    return all(isapprox.(cc, sort(cfit))) && all(isapprox.(sort([mu;sig]), sort(alpha), atol=1e-13))
 end
              
