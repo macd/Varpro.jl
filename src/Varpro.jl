@@ -8,8 +8,6 @@ using NL2sol
 
 export varpro, FitContext, NL2SOL, NL2SNO
 
-eye(n) = Matrix(1.0I, n, n)
-
 """
   # Description
 
@@ -402,7 +400,7 @@ function varpro(ctx)
         Qj = F.Q
         Rj = F.R
         Pj = F.p
-        T2 = Rj \ (eye(size(Rj, 1)))
+        T2 = Rj \ diagm(ones((size(Rj, 1))))
         covmx = sigma2 * T2 * T2'
         regression.covmx[Pj, Pj] = covmx  # Undo the pivoting permutation.
    
