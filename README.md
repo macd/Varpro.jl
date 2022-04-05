@@ -93,6 +93,15 @@ The above code produces the following figure:
 
 [ringdown]: modeled_GW150914_strain.png "Greetings Programs!"
 
+## Nonlinear optimizer
+
+Varpro depends upon having an underlying nonlinear optimization algorithm.
+Here we default to use [NL2sol](https://github.com/macd/NL2sol.f) a venerable 
+FORTRAN code from the early 1980s. That code is compiled to **NL2sol_jll**
+which is then further wrapped by [NL2sol.jl](https://github.com/macd/NL2sol.jl)
+which is used here. The code and theory behind it are discussed in [6] and
+[7]
+
 ## Limitations
 
 Only supported in Julia 1.4 and later.
@@ -123,3 +132,13 @@ of the problem.  This doesn't always work.
 
 [5] B. P. Abbott el. al. "ASTROPHYSICAL IMPLICATIONS OF THE BINARY BLACK HOLE MERGER GW150914" 
     The Astrophysical Journal Letters, Volume 818, Number 2
+
+[6] J.E. Dennis, D.M. Gay, R.E. Welsch, "An Adaptive Nonlinear
+Least-Squares Algorithm", ACM Transactions on Mathematical Software
+(TOMS), Volume 7 Issue 3, Sept. 1981, pp 348-368, ACM New York, NY, USA
+[see here](http://dl.acm.org/citation.cfm?id=355965&CFID=660003329&CFTOKEN=25049918)
+
+[7] J.E. Dennis, D.M. Gay, R.E. Welsch, "Algorithm 573: NL2SOL—An Adaptive
+Nonlinear Least-Squares Algorithm", ACM Transactions on Mathematical
+Software (TOMS), Volume 7 Issue 3, Sept. 1981, pp 369-383, ACM New
+York, NY, USA [see here](http://dl.acm.org/citation.cfm?id=355966)
