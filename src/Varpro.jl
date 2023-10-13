@@ -396,7 +396,7 @@ function varpro(ctx)
             end
         end
         # Uses compact pivoted QR.
-        F = qr(W*[phi[:, 1:n] J], Val(true))
+        F = qr(W*[phi[:, 1:n] J], ColumnNorm())
         Qj = F.Q
         Rj = F.R
         Pj = F.p
