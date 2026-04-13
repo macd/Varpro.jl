@@ -25,7 +25,8 @@ first set up a FitContext by calling the constructor as in the following
 
     ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
 
-All of these are required parameters.  The vector **y** is the data we
+This sets up the optimization problem and pre-allocates required memory.
+All of the parameters are required.  The vector **y** is the data we
 wish to fit sampled at the times **t** (or whatever is the independent
 variable).  The vector **w** is a weight vector for selectively
 weighting the data, all ones is usually a good first step. The vector
@@ -35,7 +36,17 @@ they both must share the same type.  The integer **n** is the number
 of basis functions, which is also the number of linear parameters.
 The matrix **ind** specifies the structure of the dphi matrix (see
 [4]).  The functions **f\_exp** and **g\_exp** calculate the phi and
-dphi matrices.
+dphi matrices at the current value of the nonlinear parameters.
+
+After setting up the FitContext, you can call fit(ctx) and it
+returns
+
+  alpha        fit of the nonlinear parameters
+  c            fit of the linear parameters
+  wresid       weighted residual vector
+  resid_norm   norm of the residual vector
+  y_est        modeled values at the input points
+  regression   a struct containing information on the fit
 
 The following is a complete example of fitting the H1 strain ringdown
 values of the recently discovered gravity wave GW150914 [5].
@@ -65,9 +76,9 @@ values of the recently discovered gravity wave GW150914 [5].
     function exp_fit(n, y, t)
         w = ones(length(t))
         ind = [collect(1:n)'; collect(1:n)']
-        x_init = complex.(0.1*rand(n), 2.0*rand(n))  
+        x_init = complex.(0.1*rand(n), 2.0*rand(n))
         ctx = FitContext(y, t, w, x_init, n, ind, f_exp, g_exp)
-        (alpha, c, wresid, resid_norm, y_est, regression) = varpro(ctx)
+        (alpha, c, wresid, resid_norm, y_est, regression) = fit(ctx)
     end
 
     function main()

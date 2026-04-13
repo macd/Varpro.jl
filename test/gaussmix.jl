@@ -1,8 +1,8 @@
 #  Well trying to use Varpro for Gaussian Mixture models is problematic.  We can
 #  get away with that here because we use only use 3 single variate Gaussians
 #  that are well separated and have comparable magnitudes.  Even then, I had to
-#  run the random intial value version about a dozen times to find an initial starting
-#  point that converges to the correct value
+#  run the random intial value version about a dozen times to find an initial 
+#  starting point that converges to the correct value
 
 using Varpro
 using Base.Iterators

@@ -1,21 +1,23 @@
-authors = ["Don MacMillen <don@macmillen.net>"]
 name = "Varpro"
 uuid = "ad47e2ae-6390-11e8-3558-e91f8c28af54"
-version = "0.1.0"
+version = "1.0.0"
+authors = ["Don MacMillen <don@macmillen.net>"]
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NL2sol = "2fe4ca64-33e0-11e8-0d29-fd842786b1cb"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
+[sources]
+NL2sol = {path = "/home/macd/jlang/NL2sol.jl"}
+
 [compat]
-julia = "1.4"
-NL2sol = "1.0"
+julia = "1.10"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "DelimitedFiles", "Random"]

@@ -158,11 +158,10 @@ correct = Dict{Function, Tuple}(rexp => ([1., 2., 3.], [4., 5., 6.]),
 # a bogus lessthan for complex numbers so we get (hopefully) consistent ordering
 const clt = (x, y) -> isapprox(real(x), real(y), atol=1e-4) ? imag(x) < imag(y) : real(x) < real(y)
 
-function runone(mkctx; sno=false, verbose=false, atol=0.0)
+function runone(mkctx; verbose=false, atol=0.0)
     ctx = mkctx()
     verbose && println("\n####### Varpro on problem ", string(mkctx), " ########")
     ctx.verbose = verbose
-    sno && (ctx.opto = NL2SNO)
     (alpha, c, wresid, resid_norm, y_est, regression) = try 
         varpro(ctx)
     catch exc

@@ -6,7 +6,7 @@ include("VarproTypes.jl")
 
 using NL2sol
 
-export varpro, FitContext, NL2SOL, NL2SNO
+export fit, varpro, FitContext
 
 """
   # Description
@@ -310,13 +310,8 @@ function varpro(ctx)
         iv[MXFCAL] = ctx.mxfcal
         iv[MXITER] = ctx.mxiter
         iv[PRUNIT] = 0
-        if ctx.opto == NL2SOL
-            results = nl2sol(f, g, alpha_real, mreal, iv, v)
-            ctx.verbose && println("\nNL2sol return code: ", return_code[iv[1]])
-        else
-            results = nl2sno(f, alpha_real, mreal, iv, v)
-            ctx.verbose && println("\nNL2sno return code: ", return_code[iv[1]])
-        end
+        results = nl2sol(f, g, alpha_real, mreal, iv, v)
+        ctx.verbose && println("\nNL2sol return code: ", return_code[iv[1]])
 
         ctx.verbose && println(nl2_msg)
         ctx.verbose && @show(results)
@@ -457,6 +452,9 @@ function varpro(ctx)
     return ctx.alpha, ctx.c, wresid, wresid_norm, y_est, regression
 end
 
+# Most folks are more familiar with using a "fit" function, so provide that
+# convenience here
+fit(ctx) = varpro(ctx)
 
 
 function update_alpha!(alpha_trial, ctx)
@@ -469,10 +467,7 @@ function update_alpha!(alpha_trial, ctx)
         end
         ctx.alpha = complex.(ctx.alpha_real[1:ctx.q], ctx.alpha_real[ctx.q+1:end])
     else
-        # again, cannot use a colon assignment here
-        for i = 1:ctx.q
-            ctx.alpha[i] = alpha_trial[i]
-        end
+        ctx.alpha .= alpha_trial
     end
     return nothing
 end
