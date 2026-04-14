@@ -33,7 +33,7 @@ end
 function f_gaussian(alpha, ctx)
     for j = 1:ctx.n
         for i in 1:ctx.m
-           ctx.phi[i, j] = g(ctx.t[i], alpha[2j-1], alpha[2j])
+           ctx.phi[i, j] = g(ctx.t[i,1], alpha[2j-1], alpha[2j])
         end
     end
     ctx.phi
@@ -43,8 +43,8 @@ end
 function g_gaussian(alpha, ctx)
     for j = 1:ctx.n
         for i in 1:ctx.m
-            ctx.dphi[i, 2j-1] = dμ(ctx.t[i], alpha[2j-1], alpha[2j])
-            ctx.dphi[i, 2j]   = dσ(ctx.t[i], alpha[2j-1], alpha[2j])
+            ctx.dphi[i, 2j-1] = dμ(ctx.t[i,1], alpha[2j-1], alpha[2j])
+            ctx.dphi[i, 2j]   = dσ(ctx.t[i,1], alpha[2j-1], alpha[2j])
         end
     end
     ctx.dphi
@@ -55,9 +55,9 @@ function testgauss(;verbose=true)
     n = 3  # length(c)  # the number of gaussian components
 
     # Our synthetic data
-    t = [-10.0:0.01:10.0;]
-    y = mixn.(t)
-    m = length(t)
+    t = reshape([-10.0:0.01:10.0;], 2001, 1)
+    y = mixn.(t[:,1])
+    m = 2001
     
     # we might want to use different weights for different problems here
     w = ones(m)

@@ -6,7 +6,7 @@ function sumexp(a, b, t)
     y = zeros(eltype(b), m)
     for i = 1:m
         for j = 1:n
-            y[i] += a[j] * exp(-b[j]*t[i])
+            y[i] += a[j] * exp(-b[j]*t[i, 1])
         end
     end
     y
@@ -15,7 +15,7 @@ end
 function f_exp(alpha, ctx)
     for i in 1:ctx.m
         for j = 1:ctx.n
-           ctx.phi[i, j] = exp(-alpha[j] * ctx.t[i])
+           ctx.phi[i, j] = exp(-alpha[j] * ctx.t[i, 1])
         end
     end
     ctx.phi
@@ -23,7 +23,7 @@ end
 
 function g_exp(alpha, ctx)
     for i in 1:ctx.m
-        ctx.dphi[i, :] = -ctx.t[i] * ctx.phi[i, :]
+        ctx.dphi[i, :] = -ctx.t[i, 1] * ctx.phi[i, :]
     end
     ctx.dphi
 end
@@ -31,18 +31,18 @@ end
 function f_exmpl(alpha, ctx)
     # This is an example from O'Leary and Rust
     for i in 1:ctx.m
-        ctx.phi[i, 1] = exp(-alpha[2] * ctx.t[i]) * cos(alpha[3] * ctx.t[i])
-        ctx.phi[i, 2] = exp(-alpha[1] * ctx.t[i]) * cos(alpha[2] * ctx.t[i])
+        ctx.phi[i, 1] = exp(-alpha[2] * ctx.t[i,1]) * cos(alpha[3] * ctx.t[i,1])
+        ctx.phi[i, 2] = exp(-alpha[1] * ctx.t[i,1]) * cos(alpha[2] * ctx.t[i,1])
     end
     return ctx.phi
 end
 
 function g_exmpl(alpha, ctx)
     for i in 1:ctx.m
-        ctx.dphi[i, 1] = -ctx.t[i] * ctx.phi[i, 1]
-        ctx.dphi[i, 2] = -ctx.t[i] * exp(-alpha[2] * ctx.t[i]) * sin(alpha[3] * ctx.t[i])
-        ctx.dphi[i, 3] = -ctx.t[i] * ctx.phi[i, 2]
-        ctx.dphi[i, 4] = -ctx.t[i] * exp(-alpha[1] * ctx.t[i]) * sin(alpha[2] * ctx.t[i])
+        ctx.dphi[i, 1] = -ctx.t[i,1] * ctx.phi[i, 1]
+        ctx.dphi[i, 2] = -ctx.t[i,1] * exp(-alpha[2] * ctx.t[i,1]) * sin(alpha[3] * ctx.t[i,1])
+        ctx.dphi[i, 3] = -ctx.t[i,1] * ctx.phi[i, 2]
+        ctx.dphi[i, 4] = -ctx.t[i,1] * exp(-alpha[1] * ctx.t[i,1]) * sin(alpha[2] * ctx.t[i,1])
     end
     return ctx.dphi
 end
@@ -59,7 +59,7 @@ function rexp()
     #        if we use LM instead of NL2SOL, it will fail earlier in LM (inside
     #        of some lapack code for the same reasons as above)
 
-    t = collect(-1:.1:20)
+    t = reshape(collect(-1:.1:20), 211, 1)
     a = [1., 2., 3.]
     b = [4., 5., 6.]
     y = sumexp(a, b, t)
@@ -72,7 +72,7 @@ end
 
 # Here we fit complex data
 function cexp()
-    t = collect(-1:.1:20)
+    t = reshape(collect(-1:.1:20), 211, 1)
     a = [1., 2., 3.]
     b = [.5im, 1.1im, 2.0im]
     y = sumexp(a, b, t)
@@ -95,20 +95,20 @@ end
 #      1.0132255e+00    2.4968675e+00    4.0625148e+00 
 # Note that there are many sets of parameters that fit the data well.
 function example()
-    t = [0; .1; .22; .31; .46; .50; .63; .78; .85; .97]
-    y = [ 6.9842;  5.1851;  2.8907;  1.4199; -0.2473; 
-               -0.5243; -1.0156; -1.0260; -0.9165; -0.6805]
+    t = reshape([0, .1, .22, .31, .46, .50, .63, .78, .85, .97], 10, 1)
+    y = [ 6.9842,  5.1851,  2.8907,  1.4199, -0.2473, 
+               -0.5243, -1.0156, -1.0260, -0.9165, -0.6805]
 
     # The weights for the least squares fit are stored in w.
-    w = [ 1.0; 1.0; 1.0; 0.5; 0.5; 1.0; 0.5; 1.0; 0.5; 0.5]
-    b_init = [0.5; 2; 3]  # initial guess
+    w = [ 1.0, 1.0, 1.0, 0.5, 0.5, 1.0, 0.5, 1.0, 0.5, 0.5]
+    b_init = [0.5, 2, 3]  # initial guess
     ind = [1 1 2 2; 2 3 1 2]
     ctx = FitContext(y, t, w, b_init, 2, ind, f_exmpl, g_exmpl)
 end
 
 # This is a very simple double complex exponential with no noise.
 function double_exponential()
-    t = collect(0:.05:10)
+    t = reshape(collect(0:.05:10), 201, 1)
     a = [1., 2.]
     b = [1 - 1im, 0.8 - 2im]
     y = sumexp(a, b, t)
@@ -121,7 +121,7 @@ end
 # Here we fit complex data
 function ctoo()
     n = 1000
-    t = collect(range(0.0; stop=4pi, length=n))
+    t = reshape(collect(range(0.0; stop=4pi, length=n)), 1000, 1)
     a = [1., 2., 2.]
     b = [0.1 + 10im, 0.2 + 20im, 0.3 + 30im]
     y = sumexp(a, b, t)
@@ -134,9 +134,10 @@ end
 function h1_ringdown()
     n = 4
     h1 = readdlm("h1_whitened.txt")
-    t = h1[:, 1]
+    m = size(h1, 1)
+    t = reshape(h1[:, 1], m, 1)
     y = complex.(h1[:, 2])  # must be complex to match x_init
-    w = ones(length(t))
+    w = ones(m)
     ind = [collect(1:n)'; collect(1:n)']
     rng = MersenneTwister(137)
     x_init = complex.(0.1*rand(rng, n), 2.0*rand(rng, n))  

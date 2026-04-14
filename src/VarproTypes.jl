@@ -32,7 +32,7 @@ end
 mutable struct FitContext{T<:Number}
     # Required
     y::Vector{T}         # the m 'measurements'. Can be real or complex
-    t::Vector{Float64}   # Independent variable (at m points) and is always real
+    t::Matrix{Float64}   # Independent variable (at m points) and is always real
     w::Matrix{Float64}   # the weight matrix (input initially as vector)
     alpha::Vector{T}     # Initial value of nonlinear variables. Can be real or complex
     n::Int               # number of linear parameters
@@ -72,14 +72,17 @@ mutable struct FitContext{T<:Number}
 end
 
 
-function FitContext(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada) where {T}
-    if length(size(y)) != 1 || length(size(t)) != 1 || length(size(w)) != 1 || 
-       length(size(alpha)) != 1
-        error("y, t, w, and alpha must all be vectors")
+function FitContext(y::AbstractVector{T},
+                    t::AbstractMatrix{<:Real},
+                    w::AbstractVector{<:Real},
+                    alpha::AbstractVector{T},
+                    n, ind, ada, gada) where {T}
+    if length(size(y)) != 1 || length(size(w)) != 1 || length(size(alpha)) != 1
+        error("y, w, and alpha must all be vectors")
     end
     q = length(alpha)
     m = length(y)
-    if length(t) != m || length(w) != m
+    if size(t, 1) != m || length(w) != m
         error("t (independent variable) and w (weight vector) must be same " *
               "size as y (sample vector)")
     end
@@ -99,7 +102,7 @@ function FitContext(y::Vector{T}, t, w, alpha::Vector{T}, n, ind, ada, gada) whe
         # required
         y,                       # sample values to be fit
         t,                       # independent variable
-        diagm(0 => w),                # weight matrix  (TODO: matlab code used spdiagm(w, 0, m, m))
+        diagm(0 => w),           # weight matrix  (TODO: matlab code used spdiagm(w, 0, m, m))
         alpha,                   # current estimate on non-linear parameters
         n,                       # n
         ind,                     # ind::Matrix{Int}  constant integer matrix 
